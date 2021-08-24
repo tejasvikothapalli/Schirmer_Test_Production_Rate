@@ -39,6 +39,7 @@
             <button id="removeData">Remove Data</button> -->
             <!-- <form> -->
                 <!-- <fieldset> -->
+                    
                     <div class="form-group row">
                         <div class="col-sm-10 offset-sm-1">
                             <button id =  "add_point" class="btn btn-primary">Add Data Point</button>
@@ -47,27 +48,33 @@
                             <button id =  "remove_point" class="btn btn-primary">Remove Data Point</button>
                         </div>
                     </div>
+                    
                     <div class="form-group row">
                         
-                        <label class="col-sm-3 col-form-label"><b>Time (min)</b></label>
+                        <label class="col-sm-3 col-form-label"><b>Time (sec)</b></label>
                         
                         <label class="col-sm-5 col-form-label "><b>Wetted Length (mm)</b></label>
                         
                     </div>
                     <div class="form-group row" id = "data_0">
                         
-                        <input type="number" step="1" id="data_0_time"  class="form-control col-sm-2" value=3>
+                        <input type="number" step="1" id="data_0_time"  class="form-control col-sm-2" value=180>
                         
                         <input type="number" step="0.01" id="data_0_length"  class="form-control offset-sm-2 col-sm-2" value=1>
                         
                     </div>
                     <div class="form-group row" id = "data_1">
-                        <input type="number" step="1" id="data_1_time"  class="form-control col-sm-2" value=4>
+                        <input type="number" step="1" id="data_1_time"  class="form-control col-sm-2" value=195>
                         <input type="number" step="0.01" id="data_1_length"  class="form-control offset-sm-2 col-sm-2" value=2>
                     </div>
                     <div class="form-group row" id = "data_2">
-                        <input type="number" step="1" id="data_2_time"  class="form-control col-sm-2" value=5 >
+                        <input type="number" step="1" id="data_2_time"  class="form-control col-sm-2" value=210>
                         <input type="number" step="0.01" id="data_2_length"  class="form-control offset-sm-2 col-sm-2" value=3>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for = 'saturation_time' class="col-sm-4 col-form-label"><b>Saturation Time</b></label>
+                        <input type="number" step="1" id="saturation_time"  class="form-control col-sm-2" > 
                     </div>
                     
                     <div class="form-group row">
@@ -87,7 +94,7 @@
             </div>
             <form class="form-inline pt-5">
                 <div class="form-group">
-                    <label>Production Rate</label>
+                    <label>Production Rate (uL/min)</label>
                     <input class="form-control mx-sm-3" id  = "production_rate" value = '' disabled>
                     <!-- <small class="text-muted">Must be 8-20 characters long.</small> -->
                 </div>
@@ -203,12 +210,12 @@
 
             
             elem.after(clone);
-            document.getElementById("data_" + data_div_count + "_time").value = 1 + parseInt(document.getElementById("data_" + (data_div_count-1) + "_time").value)
+            document.getElementById("data_" + data_div_count + "_time").value = 15 + parseInt(document.getElementById("data_" + (data_div_count-1) + "_time").value)
             data_div_count = data_div_count + 1;
         });
 
         document.getElementById('remove_point').addEventListener('click', function() {
-            if (data_div_count > 2) {
+            if (data_div_count > 3) {
                 var el = document.querySelector("#"+ "data_" + (data_div_count-1));
                 el.remove(); // Removes the div with the 'div-02' id
                 data_div_count = data_div_count - 1
@@ -216,6 +223,7 @@
         });
         function get_data() {
             var data = []
+            
             for (let i = 0; i < data_div_count; i++) {
                 var time_val = document.getElementById("data_" + i + "_time").value;
                 var length_val = document.getElementById("data_" + i + "_length").value;
@@ -244,10 +252,28 @@
             }
             return max_val
         }
+
+        function get_min_x(data_v) {
+            var min_val = 99999
+            for (var i = 0; i < data_v.length; i++) {
+                // console.log(data_v[i].x)
+                min_val =  Math.min(min_val, data_v[i].x)
+            }
+            return min_val
+        }
+
+        function get_min_y(data_v) {
+            var min_val = 999999
+            for (var i = 0; i < data_v.length; i++) {
+                
+                min_val =  Math.min(min_val, data_v[i].y)
+            }
+            return min_val
+        }
         document.getElementById('calc_rate').addEventListener('click', function() {
             var data_values = get_data()
             // alert(min3_length)
-            if (data_values.length == 0){
+            if (data_values.length < 3){
                 alert("invalid input")
             } else  {
                 // config.data.labels.splice(-1, 1); // remove the label first
@@ -256,6 +282,9 @@
                 // });
                 config.options.scales.xAxes.max = get_max_x(data_values) + 2
                 config.options.scales.yAxes.max = get_max_y(data_values) + 2
+
+                config.options.scales.xAxes.min = get_min_x(data_values) - 15 
+                config.options.scales.yAxes.min = get_min_y(data_values) - 2
                 
                 // config.options.scales.xAxes.max = config.options.scales.xAxes.max + parseInt(2)
                 // console.log(config.options.scales.xAxes.max)
@@ -263,9 +292,18 @@
                 var colorName = colorNames[config.data.datasets.length % colorNames.length];
                 var newColor = window.chartColors[colorName];
                 datoa = data_values
-                const clean_data = datoa.map(({ x, y }) => {
-                        return [x, y];             // we need a list of [[x1, y1], [x2, y2], ...]
+                saturation_time = 999999
+                if (!(document.getElementById("saturation_time").value === '')) {
+                    var saturation_time = parseInt(document.getElementById("saturation_time").value)
+                } 
+                
+                var clean_data = datoa.map(({ x, y }) => {
+                            if (x <= saturation_time ){
+                                return [x, y];             // we need a list of [[x1, y1], [x2, y2], ...]
+                            }
+                            
                         });
+                clean_data = clean_data.filter((a) => a)
                         // .filter(({ x, y }) => {
                         // return (
                         //     typeof x === typeof y &&  // filter out one string & one number
