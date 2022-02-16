@@ -6,7 +6,7 @@
      <meta charset="utf-8">
      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
  
-    <title>Line Chart</title>
+    <title>Tear4</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/regression/2.0.1/regression.min.js"></script>
     <script src="utils.js"></script>
@@ -73,7 +73,7 @@
                     </div>
 
                     <div class="form-group row">
-                        <label for = 'saturation_time' class="col-sm-4 col-form-label"><b>Saturation Time</b></label>
+                        <label for = 'saturation_time' class="col-sm-4 col-form-label"><b>Saturation Time (sec)</b></label>
                         <input type="number" step="1" id="saturation_time"  class="form-control col-sm-2" > 
                     </div>
                     
@@ -112,21 +112,39 @@
         const data = {
                 datasets: [],
                 };
+        // options = {
+        //     scales: {
+        //         yAxes: [{
+        //         scaleLabel: {
+        //             display: true,
+        //             labelString: 'probability'
+        //         }
+        //         }]
+        //     }     
+        // }
         const config = {
             type: 'scatter',
             data: data,
             options: {
                 scales: {
                     xAxes: {
+                        
                         type: 'linear',
                         position: 'bottom',
                         max: 7,
                         min: 0,
-                        title: "hello"
+                        title: {
+                            display: true,
+                            text: 'Wetted Length (mm)'
+                        }
                     },
                     yAxes: {
                         max: 5,
-                        min: 0
+                        min: 0,
+                        title: {
+                            display: true,
+                            text: 'Time (sec)'
+                        }
                     }
                 },
                 plugins: {
@@ -148,7 +166,7 @@
                     // }
                 }
             }
-            };
+        };
 
         window.onload = function() {
             var ctx = document.getElementById("canvas").getContext("2d");
@@ -349,7 +367,7 @@
                 
                 // console.log(config.options.scales.xAxes.max)
                 window.myLine.update();
-                document.getElementById('production_rate').value = my_regression.equation[0]
+                document.getElementById('production_rate').value = my_regression.equation[0] * 60
             }
                 
         });
