@@ -289,6 +289,11 @@
             }
             return min_val
         }
+
+        function round(value, precision) {
+            var multiplier = Math.pow(10, precision || 0);
+            return Math.round(value * multiplier) / multiplier;
+        }
         document.getElementById('calc_rate').addEventListener('click', function() {
             var data_values = get_data()
             // alert(min3_length)
@@ -334,7 +339,7 @@
                         // })
                         
                 // console.log(clean_data)
-                const my_regression = regression.linear(clean_data);
+                const my_regression = regression.linear(clean_data, {precision: 12});
                 const useful_points = my_regression.points.map(([x, y]) => {
                                         return { x: x, y: y };    
                                     })
@@ -342,7 +347,8 @@
                 // console.log(my_regression)
 
                 var regression_line = {
-                    label: 'Regression Line: ' + my_regression.string,
+                    // label: 'Regression Line: ' + my_regression.string,
+                    label: 'Regression Line: ' + round(my_regression.equation[0], 2) + 'x + ' + round(my_regression.equation[1], 2),
                     backgroundColor: window.chartColors.red,
                     borderColor: window.chartColors.red,
                     data: useful_points,
@@ -368,7 +374,9 @@
                 
                 // console.log(config.options.scales.xAxes.max)
                 window.myLine.update();
-                document.getElementById('production_rate').value = my_regression.equation[0] * 60 * 0.7
+                console.log(my_regression)
+
+                document.getElementById('production_rate').value = round(my_regression.equation[0] * 60 * 0.7, 1)
             }
                 
         });
