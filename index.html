@@ -136,7 +136,8 @@
                         min: 0,
                         title: {
                             display: true,
-                            text: 'Wetted Length (mm)'
+                            
+                            text: 'Time (sec)'
                         }
                     },
                     yAxes: {
@@ -144,7 +145,7 @@
                         min: 0,
                         title: {
                             display: true,
-                            text: 'Time (sec)'
+                            text: 'Wetted Length (mm)'
                         }
                     }
                 },
@@ -339,7 +340,7 @@
                         // })
                         
                 // console.log(clean_data)
-                const my_regression = regression.linear(clean_data, {precision: 12});
+                const my_regression = regression.linear(clean_data, {precision: 32});
                 const useful_points = my_regression.points.map(([x, y]) => {
                                         return { x: x, y: y };    
                                     })
@@ -376,7 +377,9 @@
                 window.myLine.update();
                 console.log(my_regression)
 
-                document.getElementById('production_rate').value = round(my_regression.equation[0] * 60 * 0.7, 1)
+                document.getElementById('production_rate').value = round(my_regression.equation[0] * 60 * 0.7 * 5 * 0.22, 2).toFixed(2)
+                
+                // round(my_regression.equation[0] * 60 * 0.7, 3)
             }
                 
         });
